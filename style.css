@@ -1,0 +1,68 @@
+* {
+    border: none;
+    outline: none;
+}
+
+.container {
+    position: absolute;
+    top: 50vh;
+    left: 50vw;
+    transform: translate(-50%, -50%);
+    border: 1px solid black;
+    display: flex;
+    flex-direction: column;
+}
+
+#bar {
+    display: flex;
+    flex-direction: row;
+    width: 100%;  
+    font-size: 1.1rem;  
+    border-bottom: 1px solid black;
+}
+
+#equation-input {
+    flex: 12;
+    padding: 10px;
+}
+
+#graph {
+    position: relative;
+}
+
+#positive-x-marker {
+    position: absolute;
+    top: 50%;
+    right: 20px;
+}
+
+#negative-x-marker {
+    position: absolute;
+    top: 50%;
+    left: 20px;
+}
+
+#positive-y-marker {
+    position: absolute;
+    left: 50%;
+    top: 20px;
+}
+
+#negative-y-marker {
+    position: absolute;
+    left: 50%;
+    bottom: 20px;
+}
+
+.button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    border-left: 1px solid black;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: grey;
+}
