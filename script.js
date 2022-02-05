@@ -16,6 +16,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let SLOPE_FIELD_DATA = {
         intervals: { x: 40, y: 30 }
     }
+    let VECTOR_FIELD_DATA = {
+        intervals: { x: 40, y: 30 }
+    }
 
     const positiveXMarker = document.getElementById("positive-x-marker")
     const negativeXMarker = document.getElementById("negative-x-marker")
@@ -94,8 +97,8 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.fill()
     }
 
-    // equationInput.value = "s: -x/y; Math.sqrt(9-x**2); -Math.sqrt(9-x**2)"
-    // GRAPH_EQUATIONS = equationInput.value.split(";").map(e => e.trim())
+    equationInput.value = "v: (x, y)"
+    GRAPH_EQUATIONS = equationInput.value.split(";").map(e => e.trim())
     updateGraph()
 
     function canvasPosition(point) {
@@ -151,8 +154,9 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log(GRAPH_EQUATIONS)
         for (let i = 0; i < GRAPH_EQUATIONS.length; i++) {
             if (GRAPH_EQUATIONS[i].substring(0, 2) === "s:") {
-                console.log("SLOPE!")
                 graphSlopeField(GRAPH_EQUATIONS[i].substring(2))
+            } else if (GRAPH_EQUATIONS[i].substring(0, 2) === "v:") {
+                graphVectorField(GRAPH_EQUATIONS[i].substring(2))
             } else {
                 graphFunction(GRAPH_EQUATIONS[i], {
                     color: COLORS[i % COLORS.length]
@@ -171,10 +175,6 @@ document.addEventListener("DOMContentLoaded", () => {
         negativeYMarker.innerText = Y_RANGE.min 
     }
 
-    function calculateSlope(equation, x, y) {
-        return eval(equation.replaceAll("x", `(${x})`).replaceAll("y", `(${y})`)) 
-    }
-
     function graphSlopeField(slope_equation) {
         const intervals = SLOPE_FIELD_DATA.intervals
         let points = []
@@ -191,7 +191,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         y
                     }
                     const canvasPoint = canvasPosition(cartesianPoint)
-                    const slope = calculateSlope(slope_equation, x, y)
+                    const slope = calculateXY(slope_equation, x, y)
                     points.push({
                         cartesianPoint,
                         canvasPoint,
@@ -219,10 +219,94 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.moveTo(point.x - dx, point.y + dy)
         ctx.lineTo(point.x + dx, point.y - dy)
         ctx.stroke()
+
     }
 
-    function calculateY(equation, x) {
-        return eval(equation.replaceAll("x", `(${x})`))
+
+    function graphVectorField(vector_string) {
+        let vector_expression
+        try {
+            const vector_array = vector_string.split(",").map(e => e.trim())
+            console.log("VA", vector_array)
+            vector_expression = {
+                x: vector_array[0].substring(1),
+                y: vector_array[1].substring(0, vector_array[1].length - 1)
+            }
+        } catch (error) {
+            console.log("E", error)
+            return "Invalid input"
+        }
+        console.log("ve:", vector_expression)
+        const intervals = VECTOR_FIELD_DATA.intervals
+        let points = []
+        const xStep = (X_RANGE.max - X_RANGE.min) / intervals.x
+        const yStep = (Y_RANGE.max - Y_RANGE.min) / intervals.y
+        ctx.fillStyle = "black"
+        ctx.strokeStyle = "black"
+        try {
+            const vector = {
+                x: calculateXY(vector_expression.x, 0, 0),
+                y: calculateXY(vector_expression.y, 0, 0)
+            }
+        } catch (error) {
+            console.log("E", error)
+            return
+        }
+        for (let x = X_RANGE.min; x <= X_RANGE.max + xStep; x += xStep) {
+            for (let y = Y_RANGE.min; y < Y_RANGE.max + yStep; y += yStep)
+                try {
+                    const cartesianPoint = {
+                        x, 
+                        y
+                    }
+                    const canvasPoint = canvasPosition(cartesianPoint)
+                    
+                    const vector = {
+                        x: calculateXY(vector_expression.x, x, y),
+                        y: calculateXY(vector_expression.y, x, y)
+                    }
+                    points.push({
+                        cartesianPoint,
+                        canvasPoint,
+                        vector
+                    })
+                    drawVector(canvasPoint, vector)
+                } catch (err) {
+                    console.error(err)
+                }
+ 
+        }
+        console.log(points)
+    }
+
+    function drawVector(point, vector) {
+        const slope = vector.y / vector.x
+        let hypotenuse = Math.sqrt(vector.x**2 + vector.y**2)
+        hypotenuse = hypotenuse < 10 ? hypotenuse : 10
+        const angle = Math.atan(slope)
+        const dx = Math.cos(angle) * hypotenuse
+        const dy = Math.sin(angle) * hypotenuse
+        ctx.beginPath()
+        ctx.lineWidth = 1
+        ctx.moveTo(point.x - dx, point.y + dy)
+        ctx.lineTo(point.x + dx, point.y - dy)
+        ctx.stroke()
+        if (vector.x > 0 && vector.y > 0) {
+            drawPoint({ x: point.x + dx, y: point.y - dy }, 2)
+        } else if (vector.x < 0 && vector.y > 0) {
+            drawPoint({ x: point.x - dx, y: point.y + dy }, 2)
+        } else if (vector.x < 0 && vector.y < 0) {
+            drawPoint({ x: point.x - dx, y: point.y + dy }, 2)
+        } else {
+            drawPoint({ x: point.x + dx, y: point.y - dy }, 2)
+        } 
     }
 })
 
+function calculateY(equation, x) {
+    return eval(equation.replaceAll("x", `(${x})`))
+}
+
+function calculateXY(equation, x, y) {
+    return eval(equation.replaceAll("x", `(${x})`).replaceAll("y", `(${y})`)) 
+}
