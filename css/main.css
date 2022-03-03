@@ -1,0 +1,12 @@
+* {
+    border: none;
+    outline: none;
+}
+
+body {
+    overflow: hidden;
+}
+
+#graph-1, #graph-2, #graph-3 {
+    margin: 20px;
+}

@@ -2,8 +2,9 @@ class Grapher {
     constructor (params = {}) {
         // Parent element
         this.parent = params.parent
-        this.height = params.height
+        this.height = params.height 
         this.width = params.width
+        console.log(this.width, this.height)
         // DOM elements
         this.create()
         this.input = document.getElementById(`${this.parent.id}-input`)
@@ -19,7 +20,7 @@ class Grapher {
         // Graph properties
         this.box_size = 10
         this.x_range = { min: -10, max: 10 }
-        this.y_range = { min: -10, max: 10 }
+        this.y_range = { min: -10 * (this.height / this.width), max: 10 * (this.height / this.width) }
         this.function_intervals = 1000
         this.field_intervals = 20
         this.slope_intervals = { x: this.width / this.field_intervals, y: this.height / this.field_intervals }
@@ -59,8 +60,8 @@ class Grapher {
         // Graph
         const graph = document.createElement("div")
         graph.className = "grapher-graph"
-        graph.style.height = this.height
-        graph.style.width = this.width
+        graph.style.height = `${this.height}px`
+        graph.style.width = `${this.width}px`
         // Canvas
         const canvas = document.createElement("canvas")
         canvas.className = "grapher-canvas"
