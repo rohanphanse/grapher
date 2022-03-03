@@ -3,4 +3,4 @@ I love Desmos and use it all the time, but I was disappointed when I found out t
 
 Grapher supports functions, slope fields, and vector fields. Here are a few examples.
 
-![Functions Demo](https://raw.githubusercontent.com/rohanphanse/grapher/8a30619e9b7b7cdd7beb0d9790ae598f46f3a8b8/images/functions.png)
+![Functions Demo](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/functions.png)
