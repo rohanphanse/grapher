@@ -25,6 +25,10 @@ class Grapher {
         this.field_intervals = 20
         this.slope_intervals = { x: this.width / this.field_intervals, y: this.height / this.field_intervals }
         this.vector_intervals = { x: this.width / this.field_intervals, y: this.height / this.field_intervals }
+        this.polar_range = { min: 0, max: 2*Math.PI }
+        this.polar_intervals = 500
+        this.parametric_range = { min: -10, max: 10 }
+        this.parametric_intervals = 1000
         this.expressions = []
         this.colors = ["black", "red", "green", "blue", "purple"]
         console.log(this.parent.id, this)
@@ -49,14 +53,14 @@ class Grapher {
         input.className = "grapher-input"
         input.placeholder = "Enter function(s), slope field(s), and vector field(s)"
         // Zoom buttons
-        const zoomOutButton = document.createElement("div")
-        zoomOutButton.id = `${this.parent.id}-zoom-out-button`
-        zoomOutButton.className = "grapher-zoom-button"
-        zoomOutButton.innerText = "-"
         const zoomInButton = document.createElement("div")
         zoomInButton.id = `${this.parent.id}-zoom-in-button`
         zoomInButton.className = "grapher-zoom-button"
         zoomInButton.innerText = "+"
+        const zoomOutButton = document.createElement("div")
+        zoomOutButton.id = `${this.parent.id}-zoom-out-button`
+        zoomOutButton.className = "grapher-zoom-button"
+        zoomOutButton.innerText = "-"
         // Graph
         const graph = document.createElement("div")
         graph.className = "grapher-graph"
@@ -83,8 +87,8 @@ class Grapher {
         negYMarker.className = "grapher-neg-y-marker"
         // Append to DOM
         bar.append(input)
-        bar.append(zoomOutButton)
         bar.append(zoomInButton)
+        bar.append(zoomOutButton)
         graph.append(canvas)
         graph.append(posXMarker)
         graph.append(negXMarker)
@@ -112,6 +116,7 @@ class Grapher {
             this.drawGraphs()
         }]
         this.keyListener = ["keydown", (event) => {
+            console.log(event.keyCode)
             if (event.path[0] === document.body) {
                 if (event.keyCode === 187) {
                     this.zoomInButton.click()
@@ -170,10 +175,36 @@ class Grapher {
         this.drawGraphLines()
         console.log(this.expressions)
         for (let i = 0; i < this.expressions.length; i++) {
+            const split_equals = this.expressions[i].split("=").map(e => e.trim())
+            console.log("equals", split_equals)
             if (this.expressions[i].substring(0, 2) === "s:") {
                 this.graphSlopeField(this.expressions[i].substring(2))
             } else if (this.expressions[i].substring(0, 2) === "v:") {
                 this.graphVectorField(this.expressions[i].substring(2))
+            } else if (this.expressions[i].substring(0, 2) === "p:") {
+                const expressions = {}
+                let options = {}
+                options.color = this.colors[i % this.colors.length]
+                const split_comma = this.expressions[i].split(",")
+                expressions.x = split_comma[0].split("=")[1]
+                expressions.y = split_comma[1].split("=")[1]
+                if (this.expressions[i].includes("[")) {
+                    console.log(",", split_comma[1])
+                    options.range = this.parseRange(split_comma[1] + "," + split_comma[2])
+                    expressions.y = split_comma[1].split("=")[1].split("[")[0]
+                }
+                console.log("expression", expressions)
+                this.graphParametric(expressions, options)
+            } else if (split_equals.length === 2 && split_equals[0] === "r") {
+                let options = {}
+                options.color = this.colors[i % this.colors.length]
+                console.log("OPTIONS", options)
+                let expression = split_equals[1]
+                if (split_equals[1].includes("[")) {
+                    options.range = this.parseRange(split_equals[1])
+                    expression = split_equals[1].substring(0, split_equals[1].indexOf("["))
+                }
+                this.graphPolar(expression, options)
             } else {
                 this.graphFunction(this.expressions[i], {
                     color: this.colors[i % this.colors.length]
@@ -390,6 +421,118 @@ class Grapher {
         }
         this.updateAxisMarkers()
         this.drawGraphs()
+    }
+
+    graphPolar(expression, options = {}) {
+        console.log("POLAR")
+        let code
+        try {
+            const node = math.parse(expression)
+            code = node.compile()
+            console.log("code", node, code, code.evaluate({ t: 1 }))
+        } catch (error) {
+            console.log(error)
+            return
+        }
+        let points = []
+        const range = options.range || this.polar_range
+        const d_angle = (range.max - range.min) / this.polar_intervals
+        let index = -1
+        this.ctx.fillStyle = options.color || "black"
+        this.ctx.strokeStyle = options.color || "black"
+        for (let angle = range.min; angle <= range.max; angle = Utility.round(angle + d_angle, 10)) {
+            try {
+                let polarPoint = {
+                    angle,
+                    radius: code.evaluate({ t: angle })
+                }
+                const cartesianPoint = {
+                    x: polarPoint.radius * Math.cos(angle),
+                    y: polarPoint.radius * Math.sin(angle)
+                }
+                console.log(polarPoint, cartesianPoint)
+                points.push({
+                    canvasPoint: this.mapToCanvasPoint(cartesianPoint),
+                    cartesianPoint
+                })
+                index++
+                const currentPoint = points[index].canvasPoint
+                if (index > 0 && !isNaN(points[index - 1].cartesianPoint.y.toString())) {
+                    const previousPoint = points[index - 1].canvasPoint
+                    this.ctx.beginPath()
+                    this.ctx.lineWidth = 2
+                    this.ctx.moveTo(previousPoint.x, previousPoint.y)
+                    this.ctx.lineTo(currentPoint.x, currentPoint.y)
+                    this.ctx.stroke()
+                }
+            } catch (error) {
+                points.push({ canvasPoint: null, cartesianPoint: null })
+                console.error(error)
+            }
+        }
+    }
+
+    parseRange(e) {
+        console.log("min", e.substring(e.indexOf("[") + 1, e.indexOf(",")))
+        console.log("max", e.substring(e.indexOf(",") + 1, e.indexOf("]")))
+        if (e.includes("[")) {
+            const minString = e.substring(e.indexOf("[") + 1, e.indexOf(","))
+            const maxString = e.substring(e.indexOf(",") + 1, e.indexOf("]"))
+            let min
+            let max
+            try {
+                min = math.parse(minString).compile().evaluate()
+                max = math.parse(maxString).compile().evaluate()
+            } catch (error) {
+                console.log(error)
+            }
+            return { min, max }
+        }
+    }
+
+    graphParametric(expressions, options = {}) {
+        console.log("PARAMETRIC")
+        let x_function
+        let y_function
+        try {
+            x_function = math.parse(expressions.x).compile()
+            y_function = math.parse(expressions.y).compile()
+            console.log(x_function.evaluate({ t: 1 }), y_function.evaluate({ t: 1 }))
+        } catch (error) {
+            console.log(error)
+            return
+        }
+        let points = []
+        const range = options.range || this.parametric_range
+        const dt = (range.max - range.min) / this.polar_intervals
+        let index = 0
+        this.ctx.fillStyle = options.color || "black"
+        this.ctx.strokeStyle = options.color || "black"
+        for (let t = range.min; t <= range.max; t = Utility.round(t + dt, 10)) {
+            try {
+                const cartesianPoint = {
+                    x: x_function.evaluate({ t }),
+                    y: y_function.evaluate({ t })
+                }
+                points.push({
+                    canvasPoint: this.mapToCanvasPoint(cartesianPoint),
+                    cartesianPoint
+                })
+                const currentPoint = points[index].canvasPoint
+                if (index > 0 && !isNaN(points[index - 1].cartesianPoint.y.toString())) {
+                    const previousPoint = points[index - 1].canvasPoint
+                    this.ctx.beginPath()
+                    this.ctx.lineWidth = 2
+                    this.ctx.moveTo(previousPoint.x, previousPoint.y)
+                    this.ctx.lineTo(currentPoint.x, currentPoint.y)
+                    this.ctx.stroke()
+                }
+                index++
+            } catch (error) {
+                points.push({ canvasPoint: null, cartesianPoint: null })
+                console.error(error)
+            }
+        }
     }
 }
 
