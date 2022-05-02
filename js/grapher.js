@@ -100,16 +100,38 @@ class Grapher {
 
     addListeners() {
         this.zoomOutButtonListener = ["click", () => {
-            this.x_range = { min: this.x_range.min * 2, max: this.x_range.max * 2 }
-            this.y_range = { min: this.y_range.min * 2, max: this.y_range.max * 2 }
-            this.updateAxisMarkers()
-            this.drawGraphs()
+            const original_x_range = { ...this.x_range }
+            const original_y_range = { ...this.y_range }
+            let frame = 1
+            let total_frames = 10
+            const interval = setInterval(() => {
+                if (frame > total_frames) {
+                    this.updateAxisMarkers()
+                    clearInterval(interval)
+                    return
+                }
+                this.x_range = { min: original_x_range.min * (1 + frame / total_frames), max: original_x_range.max * (1 + frame / total_frames) }
+                this.y_range = { min: original_y_range.min * (1 + frame / total_frames), max: original_y_range.max * (1 + frame / total_frames) }
+                this.drawGraphs()
+                frame++
+            }, 10)
         }]
         this.zoomInButtonListener = ["click", () => {
-            this.x_range = { min: this.x_range.min / 2, max: this.x_range.max / 2 }
-            this.y_range = { min: this.y_range.min / 2, max: this.y_range.max / 2 }
-            this.updateAxisMarkers()
-            this.drawGraphs()
+            const original_x_range = { ...this.x_range }
+            const original_y_range = { ...this.y_range }
+            let frame = 1
+            let total_frames = 10
+            const interval = setInterval(() => {
+                if (frame > total_frames) {
+                    this.updateAxisMarkers()
+                    clearInterval(interval)
+                    return
+                }
+                this.x_range = { min: original_x_range.min * (1 - 0.5 * frame / total_frames), max: original_x_range.max * (1 - 0.5 * frame / total_frames) }
+                this.y_range = { min: original_y_range.min * (1 - 0.5 * frame / total_frames), max: original_y_range.max * (1 - 0.5 * frame / total_frames) }
+                this.drawGraphs()
+                frame++
+            }, 10)
         }]
         this.inputListener = ["input", () => {
             this.expressions = this.input.value.split(";").map(e => e.trim()).filter(e => e.length)
@@ -206,52 +228,9 @@ class Grapher {
                 }
                 this.graphPolar(expression, options)
             } else {
-                this.graphFunction(this.expressions[i], {
-                    color: this.colors[i % this.colors.length]
-                })
-            }
-        }
-    }
-
-    graphFunction(expression, options = {}) {
-        let code
-        try {
-            const node = math.parse(expression)
-            code = node.compile()
-            console.log("code", node, code, code.evaluate({ x: 1 }))
-        } catch (error) {
-            console.log(error)
-            return
-        }
-        let points = []
-        const dx = (this.x_range.max - this.x_range.min) / this.function_intervals
-        let index = -1
-        console.log("dx", dx)
-        this.ctx.fillStyle = options.color || "black"
-        this.ctx.strokeStyle = options.color || "black"
-        for (let x = this.x_range.min; x <= this.x_range.max + dx; x = Utility.round(x + dx, 10)) {
-            try {
-                let cartesianPoint = {
-                    x,
-                    y: code.evaluate({ x })
-                }
-                points.push({
-                    canvasPoint: this.mapToCanvasPoint(cartesianPoint),
-                    cartesianPoint
-                })
-                index++
-                const currentPoint = points[index].canvasPoint
-                if (index > 0 && !isNaN(points[index - 1].cartesianPoint.y.toString())) {
-                    const previousPoint = points[index - 1].canvasPoint
-                    this.ctx.beginPath()
-                    this.ctx.lineWidth = 2
-                    this.ctx.moveTo(previousPoint.x, previousPoint.y)
-                    this.ctx.lineTo(currentPoint.x, currentPoint.y)
-                    this.ctx.stroke()
-                }
-            } catch (error) {
-                points.push({ canvasPoint: null, cartesianPoint: null })
-                console.error(error)
+                const options = {}
+                options.color = this.colors[i % this.colors.length]
+                graphFunction(this.expressions[i], this.canvas, this.x_range, this.y_range, this.function_intervals, options)
             }
         }
     }
@@ -440,7 +419,7 @@ class Grapher {
         let index = -1
         this.ctx.fillStyle = options.color || "black"
         this.ctx.strokeStyle = options.color || "black"
-        for (let angle = range.min; angle <= range.max; angle = Utility.round(angle + d_angle, 10)) {
+        for (let angle = range.min; angle <= range.max; angle = round(angle + d_angle, 10)) {
             try {
                 let polarPoint = {
                     angle,
@@ -508,7 +487,7 @@ class Grapher {
         let index = 0
         this.ctx.fillStyle = options.color || "black"
         this.ctx.strokeStyle = options.color || "black"
-        for (let t = range.min; t <= range.max; t = Utility.round(t + dt, 10)) {
+        for (let t = range.min; t <= range.max; t = round(t + dt, 10)) {
             try {
                 const cartesianPoint = {
                     x: x_function.evaluate({ t }),

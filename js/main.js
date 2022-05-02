@@ -4,5 +4,5 @@ document.addEventListener("DOMContentLoaded", () => {
         height: 600,
         width: 800
     })
-    graph_1.setInput("p: x = sin(t), y = cos(t) [0, 1]")
+    graph_1.setInput("sin(x)")
 })
