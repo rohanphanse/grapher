@@ -31,4 +31,6 @@ I love Desmos and use it all the time, but I was disappointed when I found out t
 Rose and Limacons | Spiral and Circles
 --- | ---
 ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/rose.png) | ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/spiral.png)
-![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/limacons.png) | ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/limacons.png)
+![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/limacons.png) | ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/circles.png)
+
+Set custom domain for parameter variable t by specifying min and max inside of square brackets separated by comma. For example, `r = t [0, 16pi]` goes from t = 0 to t = 16pi. Default domain is `[0, 2pi]`.
