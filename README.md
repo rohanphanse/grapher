@@ -56,7 +56,7 @@ Rose and Limacons | Spiral and Circles
 ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/limacons.png) | ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/circles.png)
 
 
-**Parametric:** Use prefix `pi` and enter in form of `p: x = f(t), y = g(t)`. 
+**Parametric:** Use prefix `p:` and enter in form of `p: x = f(t), y = g(t)`. 
 
 For this demo, I've graphed the beautiful [butterfly curve](https://en.wikipedia.org/wiki/Butterfly_curve_(transcendental)). Because this curve is so intricate, I upped the numbers of intervals from 1,000 (default) to 10,000.
 
