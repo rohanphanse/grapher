@@ -26,6 +26,9 @@ I'm using the wonderful [math.js](https://mathjs.org/docs/reference/functions.ht
 
 
 **Slope Fields:** Start off with the prefix `s:` and enter an expression in terms of `x` and `y`.
+
+For this demo, I'm graphing the family of sine curves `sin(x) + C` and the slope field of `cos(x)`. I've also included a hyperbola `x^2 - y^2 = 1` and the slope field `x/y`.
+
 Sines | Hyperbola
 --- | ---
 ![Sines Slope Field Demo](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/sines.png) | ![Hyperbola Slope Field Demo](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/hyperbola.png)
