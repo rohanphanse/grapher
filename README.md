@@ -34,23 +34,40 @@ Sines | Hyperbola
 ![Sines Slope Field Demo](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/sines.png) | ![Hyperbola Slope Field Demo](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/hyperbola.png)
 </p>
 
-**Vector Fields:** Use the prefix `v:` and enter 2 expressions in terms of x and y inside parentheses separated by a comma. The 2 expressions represent the x- and y-components of the vector respectively.
+**Vector Fields:** Use the prefix `v:` and enter an expression in the form of `v: (f(x, y), g(x, y))`. The 2 functions of `x` and `y` inside the paranetheses are the x- and y-components of the vector.
+
+For this demo, I've graphed a dipole vector field, which represents the electric field lines between a positive and negative charge in physics.
 
 <p align="center">
 <img src = "https://raw.githubusercontent.com/rohanphanse/grapher/main/images/dipole.png" width = "75%" alt = "Vector Field Demo" style = "margin: 0 auto" />
 </p>
 
-**Polar:** Use the prefix `r = ` and enter an expression in terms of `t`.
+**Polar:** Use the prefix `r = ` and enter an expression in the form of `r = f(t)`.
+
+For this demo, I've graphed 4 polar curves:
+1. Rose curve: `r = sin(4t)` (8 petals)
+2. Archimedes spiral: `r = t [0, 16pi]` (setting custom t-domain, default is `[0, 2pi]`)
+3. Limaçons: `r = 1 + sin(t)` (cardioid), `r = 1 + 2sin(t)` (inner loop), and `r = 3 + 2sin(t)` (dimpled)
+4. Circles: `r = 0; r = -5sin(t); r = 4cos(t); r = -3cos(t)` (using r = 0 as dummy graph to get nice colors 😎)
 
 Rose and Limacons | Spiral and Circles
 --- | ---
 ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/rose.png) | ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/spiral.png)
 ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/limacons.png) | ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/circles.png)
 
-Set custom domain for parameter variable t by specifying min and max inside of square brackets separated by comma. For example, `r = t [0, 16pi]` goes from t = 0 to t = 16pi. Default domain is `[0, 2pi]`.
 
-**Parametric:** Enter parametric graphs in the form of `p: x = f(t), y = g(t)`. For this demo, I've graphed the beautiful [butterfly curve](https://en.wikipedia.org/wiki/Butterfly_curve_(transcendental)). Because this curve is so intricate, I upped the numbers of intervals from 1,000 (default) to 10,000.
+**Parametric:** Use prefix `pi` and enter in form of `p: x = f(t), y = g(t)`. 
+
+For this demo, I've graphed the beautiful [butterfly curve](https://en.wikipedia.org/wiki/Butterfly_curve_(transcendental)). Because this curve is so intricate, I upped the numbers of intervals from 1,000 (default) to 10,000.
 
 <p align="center">
 <img src = "https://raw.githubusercontent.com/rohanphanse/grapher/main/images/butterfly.png" width = "75%" alt = "Function Demo" />
 </p>
+
+Bonus: [Gamma](https://en.wikipedia.org/wiki/Gamma_function) function, the continuation of the factorial function to decimal and complex numbers. 
+
+<p align="center">
+<img src = "https://raw.githubusercontent.com/rohanphanse/grapher/main/images/gamma.png" width = "75%" alt = "Vector Field Demo" style = "margin: 0 auto" />
+</p>
+
+And that's it! Thanks for checking out my project and use Grapher to visualize whatever your heart desires!
