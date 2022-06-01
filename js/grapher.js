@@ -4,7 +4,6 @@ class Grapher {
         this.parent = params.parent
         this.height = params.height 
         this.width = params.width
-        console.log(this.width, this.height)
         // DOM elements
         this.create()
         this.input = document.getElementById(`${this.parent.id}-input`)
@@ -20,18 +19,18 @@ class Grapher {
         // Graph properties
         this.box_size = 10
         this.x_range = { min: -10, max: 10 }
-        this.y_range = { min: -10 * (this.height / this.width), max: 10 * (this.height / this.width) }
+        this.y_range = { min: -7.5, max: 7.5 }
         this.function_intervals = 1000
         this.field_intervals = 20
         this.slope_intervals = { x: this.width / this.field_intervals, y: this.height / this.field_intervals }
         this.vector_intervals = { x: this.width / this.field_intervals, y: this.height / this.field_intervals }
-        this.polar_range = { min: 0, max: 2*Math.PI }
+        this.polar_range = { min: 0, max: 2 * Math.PI }
         this.polar_intervals = 500
         this.parametric_range = { min: -10, max: 10 }
         this.parametric_intervals = 1000
-        this.expressions = []
         this.colors = ["black", "red", "green", "blue", "purple"]
-        console.log(this.parent.id, this)
+        // Expressions
+        this.expressions = []
         // Listeners
         this.addListeners()
         // Draw graphs
@@ -100,6 +99,7 @@ class Grapher {
 
     addListeners() {
         this.zoomOutButtonListener = ["click", () => {
+            // Animate
             const original_x_range = { ...this.x_range }
             const original_y_range = { ...this.y_range }
             let frame = 1
@@ -144,6 +144,14 @@ class Grapher {
                     this.zoomInButton.click()
                 } else if (event.keyCode === 189) {
                     this.zoomOutButton.click()
+                } else if (event.keyCode === 39) {
+                    const delta_x = this.x_range.max - this.x_range.min
+                    const delta_y = this.y_range.max - this.y_range.min
+                    this.x_range = {
+                        min: this.x_range.min + delta_x / 10,
+                        max: this.x_range.min + delta_x / 10
+                    }
+                    this.drawGraphs()
                 }
             }
         }]
@@ -180,15 +188,17 @@ class Grapher {
             this.ctx.stroke()
         }       
         this.ctx.strokeStyle = "black"
+        const origin = this.mapToCanvasPoint({ x: 0, y: 0 })
+        console.log("origin", origin)
         // Center vertical line 
         this.ctx.beginPath()
-        this.ctx.moveTo(this.width / 2 + 0.5, 0)
-        this.ctx.lineTo(this.width / 2 + 0.5, this.height)
+        this.ctx.moveTo(origin.x + 0.5, 0)
+        this.ctx.lineTo(origin.x + 0.5, this.height)
         this.ctx.stroke()
         // Center horizontal line
         this.ctx.beginPath()
-        this.ctx.moveTo(0, this.height / 2 + 0.5)
-        this.ctx.lineTo(this.width, this.height / 2 + 0.5)
+        this.ctx.moveTo(0, origin.y + 0.5)
+        this.ctx.lineTo(this.width, origin.y + 0.5)
         this.ctx.stroke()
     }
 
@@ -236,12 +246,7 @@ class Grapher {
     }
 
     mapToCanvasPoint(cartesianPoint) {
-        const x_unit = this.width / (this.x_range.max - this.x_range.min)
-        const y_unit = this.height / (this.y_range.max - this.y_range.min)
-        return {
-            x: this.width / 2 + cartesianPoint.x * x_unit,
-            y: this.height / 2 - cartesianPoint.y * y_unit
-        }
+        return mapToCanvasPoint(this.canvas, this.x_range, this.y_range, cartesianPoint)
     }
 
     updateAxisMarkers() {
