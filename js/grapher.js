@@ -27,7 +27,7 @@ class Grapher {
         this.polar_range = { min: 0, max: 2 * Math.PI }
         this.polar_intervals = 500
         this.parametric_range = { min: -10, max: 10 }
-        this.parametric_intervals = 1000
+        this.parametric_intervals = 10000
         this.colors = ["black", "red", "green", "blue", "purple"]
         // Expressions
         this.expressions = []
@@ -491,7 +491,7 @@ class Grapher {
         }
         let points = []
         const range = options.range || this.parametric_range
-        const dt = (range.max - range.min) / this.polar_intervals
+        const dt = (range.max - range.min) / this.parametric_intervals
         let index = 0
         this.ctx.fillStyle = options.color || "black"
         this.ctx.strokeStyle = options.color || "black"

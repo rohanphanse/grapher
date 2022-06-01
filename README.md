@@ -34,3 +34,8 @@ Rose and Limacons | Spiral and Circles
 ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/limacons.png) | ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/circles.png)
 
 Set custom domain for parameter variable t by specifying min and max inside of square brackets separated by comma. For example, `r = t [0, 16pi]` goes from t = 0 to t = 16pi. Default domain is `[0, 2pi]`.
+
+**Parametric: **
+Enter parametric graphs in the form of `p: x = f(t), y = g(t)`. For this demo, I've graphed the beautiful [butterfly curve](https://en.wikipedia.org/wiki/Butterfly_curve_(transcendental)). Because this curve is so intricate, I upped the numbers of intervals (distinct line segments) from the default 1,000 to 10,000.
+
+<img src = "https://raw.githubusercontent.com/rohanphanse/grapher/main/images/butterfly.png" width = "75%" alt = "Function Demo" />
