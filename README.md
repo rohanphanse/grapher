@@ -1,5 +1,5 @@
 # Grapher
-I love Desmos and use it all the time, but I was disappointed when I found out they didn't support slope and vector fields. So I decided to take on the challenge and code my own graphing calc with the desired functionality. After a few days of hard work, I'm proud to present the result, Grapher!
+I love Desmos and use it all the time, but I was disappointed when I found out they didn't support slope and vector fields. So I decided to take on the challenge and code my own graphing calc with the desired functionality. After a lot of hard work and some intense mathematics 🙂, I'm proud to present the result, Grapher!
 
 ## Features
 * Graph functions, slope fields, vector fields, polar, and parametric
@@ -23,6 +23,6 @@ x^2; sin(x - 2); -3(x + 4); 1/x
 s: cos(x); sin(x); sin(x) + 2; sin(x) - 2;
 ```
 
-![Slope Field Demo](need link)
+![Slope Field Demo](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/slope-field.png))
 
 
