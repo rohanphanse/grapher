@@ -210,7 +210,9 @@ class Grapher {
             const split_equals = this.expressions[i].split("=").map(e => e.trim())
             console.log("equals", split_equals)
             if (this.expressions[i].substring(0, 2) === "s:") {
-                this.graphSlopeField(this.expressions[i].substring(2))
+                const options = {}
+                options.color = this.colors[i % this.colors.length]
+                this.graphSlopeField(this.expressions[i].substring(2), options)
             } else if (this.expressions[i].substring(0, 2) === "v:") {
                 this.graphVectorField(this.expressions[i].substring(2))
             } else if (this.expressions[i].substring(0, 2) === "p:") {
@@ -256,7 +258,7 @@ class Grapher {
         this.negYMarker.innerText = this.y_range.min 
     }
 
-    graphSlopeField(expression) {
+    graphSlopeField(expression, options) {
         let code
         try {
             const node = math.parse(expression)
@@ -267,6 +269,7 @@ class Grapher {
             return
         }
         let points = []
+        this.ctx.strokeStyle = options.color || "black"
         const x_step = (this.x_range.max - this.x_range.min) / this.slope_intervals.x
         const y_step = (this.y_range.max - this.y_range.min) / this.slope_intervals.y
         let index = -1
