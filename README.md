@@ -11,16 +11,19 @@ I love Desmos and use it all the time, but I was disappointed when I found out t
 ## Guide + Demos
 **Functions:** Enter a function f(x) by writing any expression with the x variable. Separate multiple graphs with semicolons. 
 
-<img src = "https://raw.githubusercontent.com/rohanphanse/grapher/main/images/functions.png" width = "75%" alt = "Function Demo" style = "margin: 0 auto" />
+<p align = "center">
+<img src = "https://raw.githubusercontent.com/rohanphanse/grapher/main/images/functions.png" width = "75%" alt = "Function Demo" />
+</p>
 
 **Slope Fields:** Use the prefix `s:` and enter an expression in terms of x and y.
-
+<p align = "center">
 <img src = "https://raw.githubusercontent.com/rohanphanse/grapher/main/images/slope-field.png" width = "75%" alt = "Slope Field Demo" style = "margin: 0 auto" />
-![Slope Field Demo]())
+</p>
 
 **Vector Fields:** Use the prefix `v:` and enter 2 expressions in terms of x and y inside parentheses separated by a comma.
 
+<p align="center">
 <img src = "https://raw.githubusercontent.com/rohanphanse/grapher/main/images/dipole.png" width = "75%" alt = "Vector Field Demo" style = "margin: 0 auto" />
-
+</p>
 
 
