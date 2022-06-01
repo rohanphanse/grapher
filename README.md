@@ -20,10 +20,15 @@ I love Desmos and use it all the time, but I was disappointed when I found out t
 <img src = "https://raw.githubusercontent.com/rohanphanse/grapher/main/images/slope-field.png" width = "75%" alt = "Slope Field Demo" style = "margin: 0 auto" />
 </p>
 
-**Vector Fields:** Use the prefix `v:` and enter 2 expressions in terms of x and y inside parentheses separated by a comma.
+**Vector Fields:** Use the prefix `v:` and enter 2 expressions in terms of x and y inside parentheses separated by a comma. The 2 expressions represent the x- and y-components of the vector respectively.
 
 <p align="center">
 <img src = "https://raw.githubusercontent.com/rohanphanse/grapher/main/images/dipole.png" width = "75%" alt = "Vector Field Demo" style = "margin: 0 auto" />
 </p>
 
+**Polar:** Use the prefix `r = ` and enter an expression in terms of `t`.
 
+Header A | Header B
+--- | ---
+![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/dipole.png) | ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/dipole.png)
+![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/dipole.png) | ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/dipole.png)

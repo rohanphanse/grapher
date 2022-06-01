@@ -470,6 +470,9 @@ class Grapher {
             } catch (error) {
                 console.log(error)
             }
+            if (min === max) {
+                throw new Error("Invalid range!")
+            } 
             return { min, max }
         }
     }
