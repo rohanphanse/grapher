@@ -28,7 +28,7 @@ I love Desmos and use it all the time, but I was disappointed when I found out t
 
 **Polar:** Use the prefix `r = ` and enter an expression in terms of `t`.
 
-Header A | Header B
+Rose and Limacons | Spiral and Circles
 --- | ---
-![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/dipole.png) | ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/dipole.png)
-![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/dipole.png) | ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/dipole.png)
+![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/rose.png) | ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/spiral.png)
+![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/limacons.png) | ![](https://raw.githubusercontent.com/rohanphanse/grapher/main/images/limacons.png)
