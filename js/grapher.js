@@ -4,6 +4,8 @@ class Grapher {
         this.parent = params.parent
         this.height = params.height 
         this.width = params.width
+        // State
+        this.canZoom = true
         // DOM elements
         this.create()
         this.input = document.getElementById(`${this.parent.id}-input`)
@@ -99,14 +101,19 @@ class Grapher {
 
     addListeners() {
         this.zoomOutButtonListener = ["click", () => {
+            if (!this.canZoom) {
+                return;
+            }
             // Animate
             const original_x_range = { ...this.x_range }
             const original_y_range = { ...this.y_range }
             let frame = 1
             let total_frames = 10
+            this.canZoom = false
             const interval = setInterval(() => {
                 if (frame > total_frames) {
                     this.updateAxisMarkers()
+                    this.canZoom = true
                     clearInterval(interval)
                     return
                 }
@@ -117,13 +124,18 @@ class Grapher {
             }, 10)
         }]
         this.zoomInButtonListener = ["click", () => {
+            if (!this.canZoom) {
+                return;
+            }
             const original_x_range = { ...this.x_range }
             const original_y_range = { ...this.y_range }
             let frame = 1
             let total_frames = 10
+            this.canZoom = false
             const interval = setInterval(() => {
                 if (frame > total_frames) {
                     this.updateAxisMarkers()
+                    this.canZoom = true
                     clearInterval(interval)
                     return
                 }
