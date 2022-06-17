@@ -20,7 +20,7 @@ class Grapher {
         this.box_size = 10
         this.x_range = { min: -10, max: 10 }
         this.y_range = { min: -7.5, max: 7.5 }
-        this.function_intervals = 10000
+        this.function_intervals = 1000
         this.field_intervals = 20
         this.slope_intervals = { x: this.width / this.field_intervals, y: this.height / this.field_intervals }
         this.vector_intervals = { x: this.width / this.field_intervals, y: this.height / this.field_intervals }

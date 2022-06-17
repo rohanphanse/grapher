@@ -4,5 +4,5 @@ document.addEventListener("DOMContentLoaded", () => {
         height: 600,
         width: 800
     })
-    graph_1.setInput("gamma(x)")
+    graph_1.setInput("sin(x)")
 })
