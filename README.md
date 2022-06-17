@@ -64,7 +64,7 @@ For this demo, I've graphed the beautiful [butterfly curve](https://en.wikipedia
 <img src = "https://raw.githubusercontent.com/rohanphanse/grapher/main/images/butterfly.png" width = "75%" alt = "Function Demo" />
 </p>
 
-Bonus: [Gamma](https://en.wikipedia.org/wiki/Gamma_function) function, the continuation of the factorial function to decimal and complex numbers. 
+Bonus: [Gamma](https://en.wikipedia.org/wiki/Gamma_function) function, the continuation of the factorial function to decimal and complex numbers (graphed with 10,000 intervals). 
 
 <p align="center">
 <img src = "https://raw.githubusercontent.com/rohanphanse/grapher/main/images/gamma.png" width = "75%" alt = "Vector Field Demo" style = "margin: 0 auto" />
