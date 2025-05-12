@@ -1,3 +1,11 @@
+:root {
+    --text: black;
+    --border: rgb(221, 221, 221);
+    --bg-color: #ffffff;
+    --bg-light: rgb(240, 240, 240);
+    --text-medium: rgb(121, 121, 121);
+}
+
 * {
     border: none;
     outline: none;
@@ -5,15 +13,24 @@
 
 body {
     overflow: hidden;
+    font-family: monospace;
+    margin: 0;
 }
 
-
-
 #container {
-    position: absolute;
-    top: 50vh;
-    left: 50vw;
-    transform: translate(-50%, -50%);
+    position: relative;
+    width: 100vw;
+    height: 100vh;
     display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
+}
+
+#info {
+    position: absolute;
+    bottom: 10px;
+    left: 15px;
+    font-size: 0.7rem;
+    color: var(--text-medium);
 }

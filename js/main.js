@@ -1,8 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const graph_1 = new Grapher({
+    calculator = new Calculator()
+
+    const graph = new Grapher({
         parent: document.getElementById("graph-1"),
-        height: 600,
-        width: 800
+        height: 0.75 * window.innerHeight,
+        width: window.innerHeight
     })
-    graph_1.setInput("sin(x)")
+    graph.setInput("sin(x)")
 })

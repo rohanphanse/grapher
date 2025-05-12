@@ -18,19 +18,24 @@ class Grapher {
         // Canvas
         this.canvas = document.getElementById(`${this.parent.id}-canvas`)
         this.ctx = this.canvas.getContext("2d")
+        const dpr = window.devicePixelRatio || 1
+        this.canvas.width = this.width * dpr
+        this.canvas.height = this.height * dpr
+        this.ctx.scale(dpr, dpr)
         // Graph properties
         this.box_size = 10
         this.x_range = { min: -10, max: 10 }
         this.y_range = { min: -7.5, max: 7.5 }
-        this.function_intervals = 1000
+        this.function_intervals = 200
         this.field_intervals = 20
         this.slope_intervals = { x: this.width / this.field_intervals, y: this.height / this.field_intervals }
         this.vector_intervals = { x: this.width / this.field_intervals, y: this.height / this.field_intervals }
         this.polar_range = { min: 0, max: 2 * Math.PI }
         this.polar_intervals = 500
         this.parametric_range = { min: -10, max: 10 }
-        this.parametric_intervals = 10000
-        this.colors = ["black", "red", "green", "blue", "purple"]
+        this.parametric_intervals = 1000
+        this.colors = ["red", "green", "blue", "purple", "black"]
+        this.calc_options = { no_fraction: true, no_base_number: true, noAns: true, noRound: true }
         // Expressions
         this.expressions = []
         // Listeners
@@ -38,6 +43,7 @@ class Grapher {
         // Draw graphs
         this.updateAxisMarkers()
         this.drawGraphs()
+        this.enablePan()
     }
 
     create() {
@@ -52,7 +58,7 @@ class Grapher {
         const input = document.createElement("input")
         input.id = `${this.parent.id}-input`
         input.className = "grapher-input"
-        input.placeholder = "Enter function(s), slope field(s), and vector field(s)"
+        input.placeholder = ""
         // Zoom buttons
         const zoomInButton = document.createElement("div")
         zoomInButton.id = `${this.parent.id}-zoom-in-button`
@@ -71,8 +77,8 @@ class Grapher {
         const canvas = document.createElement("canvas")
         canvas.className = "grapher-canvas"
         canvas.id = `${this.parent.id}-canvas`
-        canvas.height = this.height
-        canvas.width = this.width
+        canvas.style.width = this.width + "px"
+        canvas.style.height = this.height + "px"
         // Axis markers
         const posXMarker = document.createElement("div")
         posXMarker.id = `${this.parent.id}-pos-x-marker`
@@ -148,10 +154,15 @@ class Grapher {
         this.inputListener = ["input", () => {
             this.expressions = this.input.value.split(";").map(e => e.trim()).filter(e => e.length)
             this.drawGraphs()
+            if (this.input.value === "") {
+                this.x_range = { min: -10, max: 10 }
+                this.y_range = { min: -10, max: 10 }
+                this.drawGraphs()
+                this.updateAxisMarkers()
+            }
         }]
         this.keyListener = ["keydown", (event) => {
-            console.log(event.keyCode)
-            if (event.path[0] === document.body) {
+            if (event.path && event.path[0] === document.body) {
                 if (event.keyCode === 187) {
                     this.zoomInButton.click()
                 } else if (event.keyCode === 189) {
@@ -181,27 +192,28 @@ class Grapher {
     }
 
     drawGraphLines() {
-        const x_offset = (this.width / 2) % this.box_size
-        const y_offset = (this.height / 2) % this.box_size
-        this.ctx.lineWidth = 1
+        const origin = this.mapToCanvasPoint({ x: 0, y: 0 })
+        const x_offset = (origin.x) % this.box_size
+        const y_offset = (origin.y) % this.box_size
+        this.ctx.lineWidth = 0.5
+        const color = getComputedStyle(document.body).getPropertyValue("--border")
+        // Vertical lines
         for(let i = 0; i < this.width / this.box_size; i++) {
-            this.ctx.strokeStyle = "#d6d6d6"
-            // Vertical lines
+            this.ctx.strokeStyle = color
             this.ctx.beginPath()
             this.ctx.moveTo(i * this.box_size + 0.5 + x_offset, 0)
             this.ctx.lineTo(i * this.box_size + 0.5 + x_offset, this.height)
             this.ctx.stroke()
         }
+        // Horizontal lines
         for (let i = 0; i < this.height / this.box_size; i++) {
-            // Horizontal lines
             this.ctx.beginPath()
             this.ctx.moveTo(0, i * this.box_size + 0.5 + y_offset)
             this.ctx.lineTo(this.width, i * this.box_size + 0.5 + y_offset)
             this.ctx.stroke()
         }       
-        this.ctx.strokeStyle = "black"
-        const origin = this.mapToCanvasPoint({ x: 0, y: 0 })
-        console.log("origin", origin)
+        const axis_color = getComputedStyle(document.body).getPropertyValue("--text")
+        this.ctx.strokeStyle = axis_color
         // Center vertical line 
         this.ctx.beginPath()
         this.ctx.moveTo(origin.x + 0.5, 0)
@@ -215,82 +227,112 @@ class Grapher {
     }
 
     drawGraphs() {
-        this.ctx.clearRect(0, 0, this.width, this.height)
-        this.drawGraphLines()
-        console.log(this.expressions)
-        for (let i = 0; i < this.expressions.length; i++) {
-            const split_equals = this.expressions[i].split("=").map(e => e.trim())
-            console.log("equals", split_equals)
-            if (this.expressions[i].substring(0, 2) === "s:") {
-                const options = {}
-                options.color = this.colors[i % this.colors.length]
-                this.graphSlopeField(this.expressions[i].substring(2), options)
-            } else if (this.expressions[i].substring(0, 2) === "v:") {
-                this.graphVectorField(this.expressions[i].substring(2))
-            } else if (this.expressions[i].substring(0, 2) === "p:") {
-                const expressions = {}
-                let options = {}
-                options.color = this.colors[i % this.colors.length]
-                const split_comma = this.expressions[i].split(",")
-                expressions.x = split_comma[0].split("=")[1]
-                expressions.y = split_comma[1].split("=")[1]
-                if (this.expressions[i].includes("[")) {
-                    console.log(",", split_comma[1])
-                    options.range = this.parseRange(split_comma[1] + "," + split_comma[2])
-                    expressions.y = split_comma[1].split("=")[1].split("[")[0]
+        try {
+            this.ctx.clearRect(0, 0, this.width, this.height)
+            this.drawGraphLines()
+            // console.log(this.expressions)
+            for (let i = 0; i < this.expressions.length; i++) {
+                const split_equals = this.expressions[i].split("=").map(e => e.trim())
+                if (this.expressions[i].substring(0, 2) === "s:") {
+                    const options = {}
+                    options.color = this.colors[i % this.colors.length]
+                    this.graphSlopeField(this.expressions[i].substring(2), options)
+                } else if (this.expressions[i].substring(0, 2) === "v:") {
+                    this.graphVectorField(this.expressions[i].substring(2))
+                } else if (this.expressions[i].substring(0, 2) === "p:") {
+                    const expressions = {}
+                    let options = {}
+                    options.color = this.colors[i % this.colors.length]
+                    const split_comma = this.expressions[i].split(",")
+                    expressions.x = split_comma[0].split("=")[1]
+                    expressions.y = split_comma[1].split("=")[1]
+                    if (this.expressions[i].includes("[")) {
+                        options.range = this.parseRange(split_comma[1] + "," + split_comma[2])
+                        expressions.y = split_comma[1].split("=")[1].split("[")[0]
+                    }
+                    this.graphParametric(expressions, options)
+                } else if (split_equals.length === 2 && split_equals[0] === "r") {
+                    let options = {}
+                    options.color = this.colors[i % this.colors.length]
+                    let expression = split_equals[1]
+                    if (split_equals[1].includes("[")) {
+                        options.range = this.parseRange(split_equals[1])
+                        expression = split_equals[1].substring(0, split_equals[1].indexOf("["))
+                    }
+                    this.graphPolar(expression, options)
+                } else {
+                    const options = {}
+                    options.color = this.colors[i % this.colors.length]
+                    this.graphFunction(this.expressions[i], options)
                 }
-                console.log("expression", expressions)
-                this.graphParametric(expressions, options)
-            } else if (split_equals.length === 2 && split_equals[0] === "r") {
-                let options = {}
-                options.color = this.colors[i % this.colors.length]
-                console.log("OPTIONS", options)
-                let expression = split_equals[1]
-                if (split_equals[1].includes("[")) {
-                    options.range = this.parseRange(split_equals[1])
-                    expression = split_equals[1].substring(0, split_equals[1].indexOf("["))
-                }
-                this.graphPolar(expression, options)
-            } else {
-                const options = {}
-                options.color = this.colors[i % this.colors.length]
-                graphFunction(this.expressions[i], this.canvas, this.x_range, this.y_range, this.function_intervals, options)
             }
+        } catch (error) {
+            // console.log(error)
         }
     }
 
     mapToCanvasPoint(cartesianPoint) {
-        return mapToCanvasPoint(this.canvas, this.x_range, this.y_range, cartesianPoint)
+        const x_unit = this.width / (this.x_range.max - this.x_range.min)
+        const y_unit = this.height / (this.y_range.max - this.y_range.min)
+        return {
+            x: (cartesianPoint.x - this.x_range.min) * x_unit,
+            y: this.height - (cartesianPoint.y - this.y_range.min) * y_unit
+        }
     }
 
     updateAxisMarkers() {
-        this.posXMarker.innerText = this.x_range.max
-        this.negXMarker.innerText = this.x_range.min
-        this.posYMarker.innerText = this.y_range.max
-        this.negYMarker.innerText = this.y_range.min 
+        this.posXMarker.innerText = parseFloat(round(this.x_range.max, 1)).toString()
+        this.negXMarker.innerText = parseFloat(round(this.x_range.min, 1)).toString()
+        this.posYMarker.innerText = parseFloat(round(this.y_range.max, 1)).toString()
+        this.negYMarker.innerText = parseFloat(round(this.y_range.min, 1)).toString()
+        const origin = this.mapToCanvasPoint({ x: 0, y: 0 })
+        const canvas_bounds = {
+            left: 0,
+            top: 0,
+            right: this.width - 40,
+            bottom: this.height - 15
+        }
+        let posX = origin.y + 5
+        let negX = origin.y + 5
+        let posY = origin.x + 5
+        let negY = origin.x + 5
+        // Bound markers within canvas
+        posX = Math.max(canvas_bounds.top + 5, Math.min(posX, canvas_bounds.bottom))
+        negX = Math.max(canvas_bounds.top + 5, Math.min(negX, canvas_bounds.bottom))
+        posY = Math.max(canvas_bounds.left + 5, Math.min(posY, canvas_bounds.right))
+        negY = Math.max(canvas_bounds.left + 5, Math.min(negY, canvas_bounds.right))
+        this.posXMarker.style.top = `${posX}px`
+        this.negXMarker.style.top = `${negX}px`
+        this.posYMarker.style.left = `${posY}px`
+        this.negYMarker.style.left = `${negY}px`
     }
 
     graphSlopeField(expression, options) {
-        let code
         try {
-            const node = math.parse(expression)
-            code = node.compile()
-            console.log("code", node, code, code.evaluate({ x: 1, y: 1 }))
+            delete calculator.functions["graph"]
+            if (expression in calculator.functions) {
+                calculator.calculate(`graph(x, y) = ${expression}(x, y)`, this.calc_options)
+            } else {
+                calculator.calculate(`graph(x, y) = ${expression}`, this.calc_options)
+            }
+            let result = calculator.calculate("graph(1, 1)", this.calc_options)
+            if (typeof result !== "number" && !(typeof result === "string" && result.includes("NaN"))) {
+                throw result
+            }
         } catch (error) {
-            console.log(error)
+            // console.log("Error", error)
             return
         }
         let points = []
         this.ctx.strokeStyle = options.color || "black"
         const x_step = (this.x_range.max - this.x_range.min) / this.slope_intervals.x
         const y_step = (this.y_range.max - this.y_range.min) / this.slope_intervals.y
-        let index = -1
         for (let x = this.x_range.min; x <= this.x_range.max + x_step; x += x_step) {
             for (let y = this.y_range.min; y < this.y_range.max + y_step; y += y_step)
                 try {
                     const cartesianPoint = { x, y }
                     const canvasPoint = this.mapToCanvasPoint(cartesianPoint)
-                    const slope = code.evaluate({ x, y })
+                    const slope = calculator.evaluate(["graph", new Paren([x, y])], this.calc_options)
                     points.push({
                         cartesianPoint,
                         canvasPoint,
@@ -298,11 +340,10 @@ class Grapher {
                     })
                     this.drawSlopeFieldLine(canvasPoint, slope)
                 } catch (error) {
-                    console.error(error)
+                    // console.error(error)
                 }
  
         }
-        console.log(points)
     }
 
     drawSlopeFieldLine(point, slope) {
@@ -320,43 +361,51 @@ class Grapher {
     }
 
     graphVectorField(expression) {
-        let vector_expression
         try {
             expression = expression.split(",").map(e => e.trim())
-            vector_expression = {
+            expression = {
                 x: expression[0].substring(1),
                 y: expression[1].substring(0, expression[1].length - 1)
             }
         } catch (error) {
             return "Invalid input"
         }
-        let code
         try {
-            const node = {
-                x: math.parse(vector_expression.x),
-                y: math.parse(vector_expression.y)
+            delete calculator.functions["graphx"]
+            delete calculator.functions["graphy"]
+            if (expression.x in calculator.functions) {
+                calculator.calculate(`graphx(x, y) = ${expression.x}(x, y)`, this.calc_options)
+            } else {
+                calculator.calculate(`graphx(x, y) = ${expression.x}`, this.calc_options)
             }
-            code = {
-                x: node.x.compile(),
-                y: node.y.compile()
+            if (expression.y in calculator.functions) {
+                calculator.calculate(`graphy(x, y) = ${expression.y}(x, y)`, this.calc_options)
+            } else {
+                calculator.calculate(`graphy(x, y) = ${expression.y}`, this.calc_options)
             }
-            console.log("code", node, code, code.x.evaluate({ x: 1, y: 1 }), code.y.evaluate({ x: 1, y: 1 }))
+            let result = calculator.calculate("graphx(1, 1)", this.calc_options)
+            if (typeof result !== "number" && !(typeof result === "string" && result.includes("NaN"))) {
+                throw result
+            }
+            result = calculator.calculate("graphy(1, 1)", this.calc_options)
+            if (typeof result !== "number" && !(typeof result === "string" && result.includes("NaN"))) {
+                throw result
+            }
         } catch (error) {
-            console.log(error)
+            // console.log("Error", error)
             return
         }
         let points = []
         const x_step = (this.x_range.max - this.x_range.min) / this.vector_intervals.x
         const y_step = (this.y_range.max - this.y_range.min) / this.vector_intervals.y
-        let index = -1
         for (let x = this.x_range.min; x <= this.x_range.max + x_step; x += x_step) {
             for (let y = this.y_range.min; y < this.y_range.max + y_step; y += y_step)
                 try {
                     const cartesianPoint = { x, y }
                     const canvasPoint = this.mapToCanvasPoint(cartesianPoint)
                     const vector = {
-                        x: code.x.evaluate({ x, y }),
-                        y: code.y.evaluate({ x, y })
+                        x: calculator.evaluate(["graphx", new Paren([x, y])], this.calc_options),
+                        y: calculator.evaluate(["graphy", new Paren([x, y])], this.calc_options)
                     }
                     points.push({
                         cartesianPoint,
@@ -365,11 +414,10 @@ class Grapher {
                     })
                     this.drawVector(canvasPoint, vector)
                 } catch (error) {
-                    console.error(error)
+                    // console.error(error)
                 }
  
         }
-        console.log(points)
     }
 
     drawVector(point, vector) {
@@ -384,16 +432,27 @@ class Grapher {
         this.ctx.moveTo(point.x - dx, point.y + dy)
         this.ctx.lineTo(point.x + dx, point.y - dy)
         this.ctx.stroke()
-        if (vector.x > 0) {
+        if (is_close(vector.x, 0) && is_close(vector.y, 0)) {
+            return
+        } else if (is_close(vector.x, 0)) {
+            vector.x = 1e-9
+            hypotenuse = Math.min(10, Math.abs(vector.y))
+            if (vector.y > 0) {
+                this.drawVectorTriangle({ x: point.x, y: point.y - hypotenuse }, vector)
+            } else {
+                this.drawVectorTriangle({ x: point.x, y: point.y + hypotenuse }, vector)
+            }
+        } else if (vector.x > 0) {
             this.drawVectorTriangle({ x: point.x + dx, y: point.y - dy }, vector)
-        } else {
+        } else if (vector.x < 0) {
             this.drawVectorTriangle({ x: point.x - dx, y: point.y + dy }, vector)
         }
     }
 
     drawVectorTriangle(point, vector) {
-        this.ctx.strokeStyle = "black"
-        this.ctx.fillStyle = "black"
+        const color = getComputedStyle(document.body).getPropertyValue("--text")
+        this.ctx.strokeStyle = color
+        this.ctx.fillStyle = color
         const angle = Math.atan(vector.y / vector.x)
         const side = 5
         this.ctx.beginPath()
@@ -423,14 +482,19 @@ class Grapher {
     }
 
     graphPolar(expression, options = {}) {
-        console.log("POLAR")
-        let code
         try {
-            const node = math.parse(expression)
-            code = node.compile()
-            console.log("code", node, code, code.evaluate({ t: 1 }))
+            delete calculator.functions["graph"]
+            if (expression in calculator.functions) {
+                calculator.calculate(`graph(t) = ${expression}(t)`, this.calc_options)
+            } else {
+                calculator.calculate(`graph(t) = ${expression}`, this.calc_options)
+            }
+            let result = calculator.calculate("graph(1)", this.calc_options)
+            if (typeof result !== "number" && !(typeof result === "string" && result.includes("NaN"))) {
+                throw result
+            }
         } catch (error) {
-            console.log(error)
+            // console.log("Error", error)
             return
         }
         let points = []
@@ -443,13 +507,13 @@ class Grapher {
             try {
                 let polarPoint = {
                     angle,
-                    radius: code.evaluate({ t: angle })
+                    radius: calculator.evaluate(["graph", new Paren([angle])], this.options)
                 }
                 const cartesianPoint = {
                     x: polarPoint.radius * Math.cos(angle),
                     y: polarPoint.radius * Math.sin(angle)
                 }
-                console.log(polarPoint, cartesianPoint)
+                // console.log(polarPoint, cartesianPoint)
                 points.push({
                     canvasPoint: this.mapToCanvasPoint(cartesianPoint),
                     cartesianPoint
@@ -466,24 +530,26 @@ class Grapher {
                 }
             } catch (error) {
                 points.push({ canvasPoint: null, cartesianPoint: null })
-                console.error(error)
+                // console.error(error)
             }
         }
     }
 
     parseRange(e) {
-        console.log("min", e.substring(e.indexOf("[") + 1, e.indexOf(",")))
-        console.log("max", e.substring(e.indexOf(",") + 1, e.indexOf("]")))
         if (e.includes("[")) {
             const minString = e.substring(e.indexOf("[") + 1, e.indexOf(","))
             const maxString = e.substring(e.indexOf(",") + 1, e.indexOf("]"))
             let min
             let max
             try {
-                min = math.parse(minString).compile().evaluate()
-                max = math.parse(maxString).compile().evaluate()
+                min = calculator.calculate(minString, this.calc_options)
+                max = calculator.calculate(maxString, this.calc_options)
+                if (typeof min !== "number" || typeof max !== "number") {
+                    throw [min, max]
+                }
             } catch (error) {
-                console.log(error)
+                // console.log(error)
+                return
             }
             if (min === max) {
                 throw new Error("Invalid range!")
@@ -493,15 +559,29 @@ class Grapher {
     }
 
     graphParametric(expressions, options = {}) {
-        console.log("PARAMETRIC")
-        let x_function
-        let y_function
         try {
-            x_function = math.parse(expressions.x).compile()
-            y_function = math.parse(expressions.y).compile()
-            console.log(x_function.evaluate({ t: 1 }), y_function.evaluate({ t: 1 }))
+            delete calculator.functions["graphx"]
+            delete calculator.functions["graphy"]
+            if (expressions.x in calculator.functions) {
+                calculator.calculate(`graphx(t) = ${expressions.x}(t)`, this.calc_options)
+            } else {
+                calculator.calculate(`graphx(t) = ${expressions.x}`, this.calc_options)
+            }
+            if (expressions.y in calculator.functions) {
+                calculator.calculate(`graphy(t) = ${expressions.y}(t)`, this.calc_options)
+            } else {
+                calculator.calculate(`graphy(t) = ${expressions.y}`, this.calc_options)
+            }
+            let result = calculator.calculate("graphx(1)", this.calc_options)
+            if (typeof result !== "number" && !(typeof result === "string" && result.includes("NaN"))) {
+                throw result
+            }
+            result = calculator.calculate("graphy(1)", this.calc_options)
+            if (typeof result !== "number" && !(typeof result === "string" && result.includes("NaN"))) {
+                throw result
+            }
         } catch (error) {
-            console.log(error)
+            // console.log("Error", error)
             return
         }
         let points = []
@@ -513,15 +593,15 @@ class Grapher {
         for (let t = range.min; t <= range.max; t = round(t + dt, 10)) {
             try {
                 const cartesianPoint = {
-                    x: x_function.evaluate({ t }),
-                    y: y_function.evaluate({ t })
+                    x: calculator.evaluate(["graphx", new Paren([t])], this.calc_options),
+                    y: calculator.evaluate(["graphy", new Paren([t])], this.calc_options)
                 }
                 points.push({
                     canvasPoint: this.mapToCanvasPoint(cartesianPoint),
                     cartesianPoint
                 })
                 const currentPoint = points[index].canvasPoint
-                if (index > 0 && !isNaN(points[index - 1].cartesianPoint.y.toString())) {
+                if (index > 0 && isFinite(points[index - 1].cartesianPoint.y.toString())) {
                     const previousPoint = points[index - 1].canvasPoint
                     this.ctx.beginPath()
                     this.ctx.lineWidth = 2
@@ -532,9 +612,122 @@ class Grapher {
                 index++
             } catch (error) {
                 points.push({ canvasPoint: null, cartesianPoint: null })
-                console.error(error)
+                // console.error(error)
+            }
+        }
+    }
+
+    enablePan() {
+        let pos = { x: 0, y: 0 }
+        let dragging = false
+        function handleMouseDown(event) {
+            dragging = false
+            pos = { x: event.clientX, y: event.clientY }
+            document.addEventListener("mousemove", handleMouseMove)
+            document.addEventListener("mouseup", handleMouseUp)
+        }
+        const handleMouseMove = (event) => {
+            const dx = event.clientX - pos.x
+            const dy = event.clientY - pos.y
+            pos = { x: event.clientX, y: event.clientY }
+            const x_range = this.x_range.max - this.x_range.min
+            const y_range = this.y_range.max - this.y_range.min
+            const delta_x = -dx * x_range / this.width
+            const delta_y = dy * y_range / this.height
+            this.x_range.min += delta_x
+            this.x_range.max += delta_x
+            this.y_range.min += delta_y
+            this.y_range.max += delta_y
+            dragging = true
+            this.drawGraphs()
+            this.updateAxisMarkers()
+        }
+        const handleMouseUp = () => {
+            document.removeEventListener("mousemove", handleMouseMove)
+            document.removeEventListener("mouseup", handleMouseUp)
+        }
+        this.canvas.addEventListener("mousedown", handleMouseDown)
+    }
+
+    graphFunction(expression, options = {}) {
+        try {
+            delete calculator.functions["graph"]
+            if (expression in calculator.functions) {
+                calculator.calculate(`graph(x) = ${expression}(x)`, this.calc_options)
+            } else {
+                calculator.calculate(`graph(x) = ${expression}`, this.calc_options)
+            }
+            let result = calculator.calculate("graph(1)", this.calc_options)
+            if (typeof result !== "number" && !(typeof result === "string" && result.includes("NaN"))) {
+                throw result
+            }
+        } catch (error) {
+            // console.log(error) 
+            return
+        }
+        // Point data
+        let points = []
+        const dx = (this.x_range.max - this.x_range.min) / this.function_intervals
+        let index = 0
+        // Graph color
+        this.ctx.strokeStyle = options.color || "black"
+        let x = this.x_range.min
+        let min_step = dx / 10
+        let skip = false
+        let discont = false
+        while (x <= this.x_range.max + dx) {
+            let step = dx
+            try {
+                let cartesianPoint = {
+                    x,
+                    y: calculator.evaluate(["graph", new Paren([x])], this.calc_options)
+                }
+                if (isNaN(cartesianPoint.y)) {
+                    x += step
+                    discont = true
+                    continue
+                }
+                points.push({
+                    canvasPoint: this.mapToCanvasPoint(cartesianPoint),
+                    cartesianPoint
+                })
+                if (discont) {
+                    x += step
+                    index++
+                    discont = false
+                    continue
+                }
+                const currentPoint = points[index].canvasPoint
+                const currentCartesian = points[index].cartesianPoint
+                // Check for a previous point
+                if (index > 0 && (isFinite(points[index - 1].cartesianPoint.y.toString()))) {
+                    const previousPoint = points[index - 1].canvasPoint
+                    const previousCartesian = points[index - 1].cartesianPoint
+                    const slope = (currentCartesian.y - previousCartesian.y) / (currentCartesian.x - previousCartesian.x)
+                    step =  Math.min(Math.max(min_step, dx / (1 + Math.abs(slope))), dx)
+                    // Draw line from previous to current point
+                    if (Math.abs(slope) < 10000) {
+                        if (skip) {
+                            skip = false
+                        } else {
+                            this.ctx.beginPath()
+                            this.ctx.lineWidth = 2
+                            this.ctx.moveTo(previousPoint.x, previousPoint.y)
+                            this.ctx.lineTo(currentPoint.x, currentPoint.y)
+                            this.ctx.stroke()
+                        }
+                    } else {
+                        skip = true
+                    }
+                }
+                x += step
+                index++
+                // console.log(cartesianPoint.x, cartesianPoint.y)
+            } catch (error) {
+                points.push({ canvasPoint: null, cartesianPoint: null })
+                // console.error(error)
+                x += step
             }
         }
     }
 }
-

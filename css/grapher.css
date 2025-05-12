@@ -1,20 +1,27 @@
 .grapher {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    position: relative;
+    cursor: grab;
 }
 
 .grapher-bar {
     display: flex;
     flex-direction: row;
     width: 100%;  
-    font-size: 1.1rem;  
-    border: 1px solid black;
+    border: 1px solid var(--border);
     border-bottom: none;
+    margin-left: 2px;
 }
 
 .grapher-input {
-    flex: 12;
-    padding: 10px;
+    font-family: monospace;
+    padding: 3px 10px;
+    background-color: var(--bg-color);
+    color: var(--text);
+    font-size: 1rem;
+    width: 100%;
 }
 
 .grapher-graph {
@@ -22,42 +29,61 @@
 }
 
 .grapher-canvas {
-    border: 1px solid black;
+    border: 1px solid var(--border);
 }
 
 .grapher-pos-x-marker {
+    color: var(--text-medium);
+    font-size: 0.9rem;
     position: absolute;
-    top: 50%;
-    right: 20px;
+    top: calc(50% + 5px);
+    right: 5px;
+    white-space: nowrap;
+    user-select: none;
 }
 
 .grapher-neg-x-marker {
+    color: var(--text-medium);
+    font-size: 0.9rem;
     position: absolute;
-    top: 50%;
-    left: 20px;
+    top: calc(50% + 5px);
+    left: 5px;
+    white-space: nowrap;
+    user-select: none;
 }
 
 .grapher-pos-y-marker {
+    color: var(--text-medium);
+    font-size: 0.9rem;
     position: absolute;
-    left: 50%;
-    top: 20px;
+    left: calc(50% + 5px);
+    top: 5px;
+    white-space: nowrap;
+    user-select: none;
 }
 
 .grapher-neg-y-marker {
+    color: var(--text-medium);
+    font-size: 0.9rem;
     position: absolute;
-    left: 50%;
-    bottom: 20px;
+    left: calc(50% + 5px);
+    bottom: 5px;
+    white-space: nowrap;
+    user-select: none;
 }
 
 .grapher-zoom-button {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 40px;
-    border-left: 1px solid black;
+    border-left: 1px solid var(--border);
     cursor: pointer;
+    transition-duration: 0.2s;
+    width: 30px;
+    font-size: 1rem;
+    user-select: none;
 }
 
 .grapher-zoom-button:hover {
-    background-color: grey;
+    background-color: var(--bg-light);
 }
