@@ -17,9 +17,9 @@ For this demo, I've graphed the parabola `x^2`, the sine curve `sin(x) - 2`, the
 <img src = "https://raw.githubusercontent.com/rohanphanse/grapher/main/images/functions.png" width = "75%" alt = "Function Demo" />
 </p>
 
-I'm using the wonderful [math.js](https://mathjs.org/docs/reference/functions.html) library for evaluating math expressions. Here are a few useful functions and constants you can use in Grapher.
+I'm using the engine I built out for the [Functional Calculator](https://github.com/rohanphanse/calculator) to evaluate math expressions! Here are a few useful functions and constants you can use in Grapher.
 
-* Trig functions: `sin(x)`, `cos(x)`, `tan(x)`, `sec(x)`, `asin(x)` (inverse sine), ...
+* Trig functions: `sin(x)`, `cos(x)`, `tan(x)`, `sec(x)`, `arcsin(x)` (inverse sine), ...
 * Square root: `sqrt(x)`
 * Natural logarithm (base e): `log(x)`
 * Constants: `pi`, `e`
