@@ -281,10 +281,10 @@ class Grapher {
     }
 
     updateAxisMarkers() {
-        this.posXMarker.innerText = parseFloat(round(this.x_range.max, 1)).toString()
-        this.negXMarker.innerText = parseFloat(round(this.x_range.min, 1)).toString()
-        this.posYMarker.innerText = parseFloat(round(this.y_range.max, 1)).toString()
-        this.negYMarker.innerText = parseFloat(round(this.y_range.min, 1)).toString()
+        this.posXMarker.innerText = parseFloat(this.x_range.max.toPrecision(4)).toString()
+        this.negXMarker.innerText = parseFloat(this.x_range.min.toPrecision(4)).toString()
+        this.posYMarker.innerText = parseFloat(this.y_range.max.toPrecision(4)).toString()
+        this.negYMarker.innerText = parseFloat(this.y_range.min.toPrecision(4)).toString()
         const origin = this.mapToCanvasPoint({ x: 0, y: 0 })
         const canvas_bounds = {
             left: 0,
@@ -729,5 +729,27 @@ class Grapher {
                 x += step
             }
         }
+    }
+
+    updateSize(size) {
+        this.width = size.width || this.width
+        this.height = size.height || this.height
+        const dpr = window.devicePixelRatio || 1
+        this.canvas.width = this.width * dpr
+        this.canvas.height = this.height * dpr
+        this.parent.style.width = `${this.width}px`
+        this.parent.style.height = `${this.height}px`
+        const graph = this.parent.getElementsByClassName("grapher-graph")[0]
+        graph.style.width = `${this.width}px`
+        graph.style.height = `${this.height}px`
+        const canvas = this.parent.getElementsByClassName("grapher-canvas")[0]
+        canvas.style.width = `${this.width}px`
+        canvas.style.height = `${this.height}px`
+        this.ctx.setTransform(1, 0, 0, 1, 0, 0)
+        this.ctx.scale(dpr, dpr)
+        this.slope_intervals = { x: this.width / this.field_intervals, y: this.height / this.field_intervals }
+        this.vector_intervals = { x: this.width / this.field_intervals, y: this.height / this.field_intervals }
+        this.drawGraphs()
+        this.updateAxisMarkers()
     }
 }
